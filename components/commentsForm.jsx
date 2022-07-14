@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { submitComment } from "../services";
 
 const CommentsForm = ({ slug }) => {
   const [error, setError] = useState(false);
@@ -8,6 +9,11 @@ const CommentsForm = ({ slug }) => {
   const nameEl = useRef();
   const emailEl = useRef();
   const storeDataEl = useRef();
+
+  useEffect(() => {
+    nameEl.current.value = window.localStorage.getItem("name");
+    emailEl.current.value = window.localStorage.getItem("email");
+  }, []);
 
   const handleCommentSubmit = () => {
     setError(false);
@@ -30,17 +36,24 @@ const CommentsForm = ({ slug }) => {
     };
 
     if (storeData) {
-      localStorage.setItem("name", name)
-      localStorage.setItem("email", email)
+      window.localStorage.setItem("name", name);
+      window.localStorage.setItem("email", email);
     } else {
-      localStorage.removeItem("name", name)
-      localStorage.removeItem("email", email)
+      window.localStorage.removeItem("name", name);
+      window.localStorage.removeItem("email", email);
     }
+
+    submitComment(commentObj).then((res) => {
+      setShowSuccessMsg(true);
+      setTimeout(() => {
+        setShowSuccessMsg(false);
+      }, 3000);
+    });
   };
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-8 pb-12 mb-8">
-      <h3 className="text-xl mb-8 font-semibold border-b pb-4">CommentsForm</h3>
+      <h3 className="text-xl mb-8 font-semibold border-b pb-4">Leave a   Reply</h3>
       <div className="grid grid-cols-1 gap-4 mb-4">
         <textarea
           ref={commentEl}
@@ -74,7 +87,12 @@ const CommentsForm = ({ slug }) => {
             name="storeData"
             value={"true"}
           />
-        <label htmlFor="storeData" className="text-gray-500 cursor-pointer ml-2">Save my e-mail and name for the next time I comment</label>
+          <label
+            htmlFor="storeData"
+            className="text-gray-500 cursor-pointer ml-2"
+          >
+            Save my e-mail and name for the next time I comment
+          </label>
         </div>
       </div>
       {error && (
